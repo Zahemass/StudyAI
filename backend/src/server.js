@@ -25,11 +25,11 @@ uploadDirs.forEach(dir => {
 
 // CORS Configuration - FIXED
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'http://localhost:3000',
-  'http://localhost:5173', // Vite default
-  'https://study-ai-indol.vercel.app/', // Add your Vercel URL
-].filter(Boolean); // Remove undefined values
+  'https://study-43y0b0cmq-zahmess-projects.vercel.app', // frontend preview
+  'https://study-ai-indol.vercel.app',                  // frontend prod (if any)
+  'http://localhost:5173',
+].filter(Boolean);
+// Remove undefined values
 
 app.use(cors({
   origin: function (origin, callback) {
