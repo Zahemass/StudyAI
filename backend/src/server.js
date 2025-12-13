@@ -29,8 +29,9 @@ uploadDirs.forEach(dir => {
 ---------------------------------- */
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://your-frontend.vercel.app' // CHANGE THIS
+  'https://study-5m0jcl910-zahemass-projects.vercel.app'
 ];
+
 
 app.use(cors({
   origin: (origin, callback) => {
