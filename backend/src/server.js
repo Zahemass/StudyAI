@@ -25,30 +25,26 @@ uploadDirs.forEach(dir => {
 });
 
 /* ---------------------------------
-   CORS (PRODUCTION SAFE)
+   CORS (Render-safe + Express 5)
 ---------------------------------- */
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://your-frontend.vercel.app' // 🔴 CHANGE THIS
+  'https://your-frontend.vercel.app' // CHANGE THIS
 ];
 
 app.use(cors({
-  origin: function (origin, callback) {
+  origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error(`CORS blocked for origin: ${origin}`));
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`CORS blocked: ${origin}`));
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
 
-app.options('*', cors());
-
 /* ---------------------------------
-   Body parsers
+   Parsers
 ---------------------------------- */
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -67,14 +63,14 @@ app.use((req, res, next) => {
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 /* ---------------------------------
-   API Routes
+   Routes
 ---------------------------------- */
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/documents', documentRoutes);
 
 /* ---------------------------------
-   Health check
+   Health
 ---------------------------------- */
 app.get('/api/health', (req, res) => {
   res.json({
@@ -85,7 +81,7 @@ app.get('/api/health', (req, res) => {
 });
 
 /* ---------------------------------
-   Error handling
+   Error handler
 ---------------------------------- */
 app.use((err, req, res, next) => {
   console.error('❌ Error:', err.message);
@@ -99,14 +95,11 @@ app.use((err, req, res, next) => {
    404
 ---------------------------------- */
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
-  });
+  res.status(404).json({ success: false, message: 'Route not found' });
 });
 
 /* ---------------------------------
-   Start server (Render compatible)
+   Start server (Render)
 ---------------------------------- */
 app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
