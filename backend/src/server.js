@@ -1,69 +1,37 @@
-// backend/src/server.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 
-// Import routes
-const authRoutes = require('./routes/auth');
-const uploadRoutes = require('./routes/upload');
-const documentRoutes = require('./routes/documents');
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Create upload directories
-const uploadDirs = ['uploads/pdfs', 'uploads/podcasts'];
-uploadDirs.forEach(dir => {
-  const fullPath = path.join(__dirname, '..', dir);
-  if (!fs.existsSync(fullPath)) {
-    fs.mkdirSync(fullPath, { recursive: true });
-    console.log(`📁 Created directory: ${dir}`);
-  }
-});
-
-// CORS Configuration - FIXED
-const allowedOrigins = [
-  'https://study-43y0b0cmq-zahmess-projects.vercel.app', // frontend preview
-  'https://study-ai-indol.vercel.app',                  // frontend prod (if any)
-  'http://localhost:5173',
-].filter(Boolean);
-// Remove undefined values
-
+// CORS - allow frontend domain
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: true,
-  optionsSuccessStatus: 200
+  origin: process.env. FRONTEND_URL || '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
-
-// Handle preflight requests explicitly
-app.options('*', cors());
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Logging middleware
+// Logging
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url} - Origin: ${req.headers.origin}`);
+  console.log(`${req.method} ${req.url}`);
   next();
 });
 
-// Static files for uploads
+// Static files - note:  Vercel has file upload limitations
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// API Routes
+// Routes
+const authRoutes = require('./routes/auth');
+const uploadRoutes = require('./routes/upload');
+const documentRoutes = require('./routes/documents');
+
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/documents', documentRoutes);
@@ -86,15 +54,17 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
+// 404
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 Allowed origins:`, allowedOrigins);
-});
+// Only listen if not in serverless environment
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });
+}
 
+// Export for Vercel serverless
 module.exports = app;
