@@ -29,7 +29,8 @@ uploadDirs.forEach(dir => {
 ---------------------------------- */
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://study-ai-indol.vercel.app'
+  'https://study-ai-indol.vercel.app',
+ 'https://study-qbrbcl8fy-zahemass-projects.vercel.app'
 ];
 
 
