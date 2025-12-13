@@ -1,3 +1,4 @@
+// frontend/src/pages/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, FileText, Loader, Plus, Trash2, BookOpen, Youtube, File, Presentation, Table } from 'lucide-react';
